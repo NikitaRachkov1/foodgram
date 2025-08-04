@@ -13,7 +13,8 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
-    build: ./backend
+    image: nikitarachkov1/foodgram_backend:latest
+    restart: always
     env_file: .env
     depends_on:
       - db
@@ -23,13 +24,14 @@ services:
     
   frontend:
     container_name: foodgram-front
-    build: ./frontend
+    image: nikitarachkov1/foodgram_frontend:latest
     restart: always
     volumes:
       - ./frontend/:/app/result_build/
   nginx:
     container_name: foodgram-proxy
     image: nginx:1.25.4-alpine
+    restart: always
     ports:
       - "80:80"
     volumes:
