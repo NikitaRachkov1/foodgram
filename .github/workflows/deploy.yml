@@ -54,7 +54,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         source: "infra/nginx.conf"
-        target: "~/foodgram/nginx.conf"
+        target: "~/foodgram/"
     - name: Executing remote ssh commands to deploy
       uses: appleboy/ssh-action@master
       with:
@@ -71,6 +71,8 @@ jobs:
           DB_HOST=db
           DB_PORT=5432
           EOF
+
+          mv infra/nginx.conf nginx.conf
           # Выполняет pull образов с Docker Hub
           sudo docker compose -f docker-compose.yml pull
           # Перезапускает все контейнеры в Docker Compose
