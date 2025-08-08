@@ -82,10 +82,14 @@ jobs:
             DB_HOST=db
             DB_PORT=5432
             EOF
+            sudo docker compose -f docker-compose.yml down --remove-orphans || true
+
+            sudo docker image prune -af
+            sudo docker builder prune -af || true
+            sudo find /var/lib/docker/containers -name "*-json.log" -type f -exec truncate -s 0 {} \;
+
             sudo docker compose -f docker-compose.yml pull
-            sudo docker compose -f docker-compose.yml down --remove-orphans
             sudo docker compose -f docker-compose.yml up -d
             sleep 15
             sudo docker compose -f docker-compose.yml exec backend python manage.py migrate --noinput
-            sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic --noinput
-
+            sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic --noinput      
