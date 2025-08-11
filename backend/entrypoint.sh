@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e 
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:=foodgram.settings}"
+export GUNICORN_APP="${GUNICORN_APP:=foodgram.wsgi:application}"
 
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
-exec gunicorn foodgram_backend.wsgi:application
-    --bind 0.0.0.0:8000
+exec gunicorn "$GUNICORN_APP" --bind 0.0.0.0:8000
