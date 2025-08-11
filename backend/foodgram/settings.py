@@ -23,6 +23,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = 'http://89.169.161.170:8080'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
