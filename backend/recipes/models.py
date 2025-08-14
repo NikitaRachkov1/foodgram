@@ -4,6 +4,8 @@ from django.db import models
 from ingredients.models import Ingredient
 from tags.models import Tag
 
+MAX_RECIPE_NAME_LENGTH = 256
+
 
 class Recipe(models.Model):
     author = models.ForeignKey(
@@ -12,7 +14,10 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Автор',
     )
-    name = models.CharField(max_length=256, verbose_name='Название')
+    name = models.CharField(
+        max_length=MAX_RECIPE_NAME_LENGTH,
+        verbose_name='Название'
+    )
     image = models.ImageField(
         upload_to='recipes/images/',
         verbose_name='Изображение',

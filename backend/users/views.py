@@ -1,59 +1,30 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
 
 from .models import Subscription
 from recipes.pagination import PageNumberLimitPagination
-from .serializers import (CustomUserCreateSerializer, SetAvatarSerializer,
-                          SetPasswordSerializer,
+from .serializers import (UserCreateSerializer, SetAvatarSerializer,
+                          EmailAuthSerializer, SetPasswordSerializer,
                           UserSerializer, UserWithRecipesSerializer)
 
 User = get_user_model()
 
 
 class ObtainEmailAuthToken(APIView):
-    """
-    POST /api/auth/token/login/
-    Тело: { "email": "...", "password": "..." }
-    Ответ 200: { "auth_token": "..." }
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        if email is None or password is None:
-            return Response(
-                {"errors": "Требуются поля email и password"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response(
-                {"errors": "Неверные учётные данные"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if not user.check_password(password):
-            return Response(
-                {"errors": "Неверные учётные данные"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        token, _ = Token.objects.get_or_create(user=user)
-        return Response(
-            {"auth_token": token.key},
-            status=status.HTTP_200_OK
-        )
+        serializer = EmailAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token_data = serializer.save()
+        return Response(token_data, status=status.HTTP_200_OK)
 
 
 class LogoutView(APIView):
@@ -81,7 +52,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return CustomUserCreateSerializer
+            return UserCreateSerializer
         elif self.action in ('subscribe', 'subscriptions'):
             return UserWithRecipesSerializer
         return UserSerializer

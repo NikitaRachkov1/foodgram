@@ -81,6 +81,9 @@ jobs:
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             DB_HOST=db
             DB_PORT=5432
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            DEBUG=${{ secrets.DEBUG }}
+            ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
             EOF
             sudo docker compose -f docker-compose.yml down --remove-orphans || true
 

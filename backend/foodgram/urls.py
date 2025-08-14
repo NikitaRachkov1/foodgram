@@ -1,21 +1,19 @@
 from django.contrib import admin
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from users.views import UserViewSet
-from users.views import ObtainEmailAuthToken, LogoutView
-from recipes.views import RecipeViewSet
-from tags.views import TagViewSet
-from ingredients.views import IngredientViewSet
-from users.views import UserAvatarView
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.urls import include, path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
 
-router = DefaultRouter()
-router.register('users', UserViewSet, basename='users')
-router.register('recipes', RecipeViewSet, basename='recipes')
-router.register('tags', TagViewSet, basename='tags')
-router.register('ingredients', IngredientViewSet, basename='ingredients')
+from users.views import (LogoutView, ObtainEmailAuthToken,
+                         UserAvatarView)
+
 
 urlpatterns = [
+    path('users/', include('users.urls')),
+    path('tags/', include('tags.urls')),
+    path('recipes/', include('recipes.urls')),
+    path('ingredients/', include('ingredients.urls')),
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path(

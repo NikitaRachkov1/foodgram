@@ -1,23 +1,21 @@
-from rest_framework import viewsets, status
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
     IsAuthenticated,
 )
 from rest_framework.response import Response
-from django.http import HttpResponse
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from .models import Recipe, Favorite, ShoppingCart, ShortLink
-from .serializers import (
-    RecipeListSerializer,
-    RecipeCreateUpdateSerializer,
-    RecipeMiniFieldSerializer,
-)
 from .filters import RecipeFilter
+from .models import Favorite, Recipe, ShoppingCart, ShortLink
 from .pagination import PageNumberLimitPagination
 from .permissions import IsAuthorOrReadOnly
+from .serializers import (RecipeCreateUpdateSerializer,
+                          RecipeListSerializer,
+                          RecipeMiniFieldSerializer)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -44,7 +42,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.action in ['create', 'update', 'partial_update']:
+        if self.action in ('create', 'update', 'partial_update'):
             return RecipeCreateUpdateSerializer
         return RecipeListSerializer
 

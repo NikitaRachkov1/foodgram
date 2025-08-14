@@ -5,6 +5,7 @@ from .models import Recipe, IngredientInRecipe
 from ingredients.models import Ingredient
 from tags.models import Tag
 from tags.serializers import TagSerializer
+from users.serializers import UserSerializer
 
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
@@ -35,13 +36,7 @@ class RecipeMiniFieldSerializer(serializers.ModelSerializer):
 
 class RecipeListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
-
-    @property
-    def author_serializer(self):
-        from users.serializers import UserSerializer
-        return UserSerializer
-
-    author = serializers.SerializerMethodField()
+    author = UserSerializer(read_only=True)
     ingredients = IngredientInRecipeSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -112,12 +107,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         seen = set()
         for item in value:
             iid = item.get('id')
-            amt = item.get('amount')
+            amt = item.get('amount', 0)
             if iid in seen:
                 raise serializers.ValidationError(
                     _('Ингредиенты должны быть уникальны.')
                 )
-            if amt is None or amt < 1:
+            if amt < 1:
                 raise serializers.ValidationError(
                     _('Количество должно быть >= 1.')
                 )

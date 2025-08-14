@@ -1,13 +1,46 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+
+MAX_NAME_LENGTH = 150
 
 User = get_user_model()
 
 
-class CustomUserCreateSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(required=True, max_length=150)
-    last_name = serializers.CharField(required=True, max_length=150)
+class EmailAuthSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('Некорректные учетные данные')
+
+        if not user.check_password(password):
+            raise serializers.ValidationError('Некорректные учетные данные')
+
+        attrs['user'] = user
+        return attrs
+
+    def create(self, validated_data):
+        token, _ = Token.objects.get_or_create(user=validated_data['user'])
+        return {'auth_token': token.key}
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(
+        required=True,
+        max_length=MAX_NAME_LENGTH,
+    )
+    last_name = serializers.CharField(
+        required=True,
+        max_length=MAX_NAME_LENGTH,
+    )
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -43,29 +76,6 @@ class UserSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return obj.subscribers.filter(pk=user.pk).exists()
-
-
-class UserWithRecipesSerializer(UserSerializer):
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
-
-    class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count')
-
-    def get_recipes(self, obj):
-        from recipes.serializers import RecipeMiniFieldSerializer
-        limit = self.context['request'].query_params.get('recipes_limit')
-        qs = obj.recipes.all()
-        if limit:
-            qs = qs[:int(limit)]
-        return RecipeMiniFieldSerializer(
-            qs,
-            many=True,
-            context=self.context,
-        ).data
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
 
 
 class SetAvatarSerializer(serializers.Serializer):
