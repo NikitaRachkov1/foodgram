@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
