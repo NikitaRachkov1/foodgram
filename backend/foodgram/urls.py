@@ -37,5 +37,4 @@ urlpatterns = [
         UserAvatarView.as_view(),
         name='user-avatar',
     ),
-    path('api/', include(router.urls)),
 ]
