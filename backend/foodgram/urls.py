@@ -10,10 +10,10 @@ from users.views import (LogoutView, ObtainEmailAuthToken,
 
 
 urlpatterns = [
-    path('api/', include('users.urls')),
-    path('api/', include('tags.urls')),
-    path('api/', include('recipes.urls')),
-    path('api/', include('ingredients.urls')),
+    path('api/users/', include('users.urls')),
+    path('api/tags/', include('tags.urls')),
+    path('api/recipes/', include('recipes.urls')),
+    path('api/ingredients/', include('ingredients.urls')),
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
