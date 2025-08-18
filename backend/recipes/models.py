@@ -22,6 +22,8 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='recipes/images/',
         verbose_name='Изображение',
+        null=True,
+        blank=True,
     )
     text = models.TextField(verbose_name='Описание')
     cooking_time = models.PositiveIntegerField(

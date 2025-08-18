@@ -30,6 +30,7 @@ class IngredientInRecipeInline(admin.TabularInline):
     validate_min = True
     formset = IngredientInRecipeInlineFormSet
     fields = ('ingredient', 'amount')
+    autocomplete_fields = ['ingredient']
 
 
 @admin.register(Recipe)
@@ -37,6 +38,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'get_favorites_count')
     search_fields = ('name', 'author__username')
     list_filter = ('tags',)
+    inlines = [IngredientInRecipeInline]
 
     def get_favorites_count(self, obj):
         return obj.favorited_by.count()

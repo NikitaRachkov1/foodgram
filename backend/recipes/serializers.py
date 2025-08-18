@@ -1,3 +1,8 @@
+import base64
+import imghdr
+import uuid
+
+from django.core.files.base import ContentFile
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -6,6 +11,21 @@ from ingredients.models import Ingredient
 from tags.models import Tag
 from tags.serializers import TagSerializer
 from users.serializers import UserSerializer
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str):
+            if 'base64,' in data:
+                _, data = data.split('base64,', 1)
+            try:
+                decoded = base64.b64decode(data)
+            except Exception:
+                raise serializers.ValidationError('Некорректный base64.')
+            ext = imghdr.what(None, decoded) or 'jpg'
+            file_name = f'{uuid.uuid4().hex}.{ext}'
+            data = ContentFile(decoded, name=file_name)
+        return super().to_internal_value(data)
 
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
@@ -31,7 +51,12 @@ class RecipeMiniFieldSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
     def get_image(self, obj):
-        return self.context['request'].build_absolute_uri(obj.image.url)
+        request = self.context.get('request')
+        try:
+            url = obj.image.url
+        except Exception:
+            return None
+        return request.build_absolute_uri(url) if request else url
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
@@ -40,6 +65,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     ingredients = IngredientInRecipeSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -49,22 +75,27 @@ class RecipeListSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time'
         )
 
-    def get_author(self, obj):
-        return self.author_serializer(obj.author, context=self.context).data
-
     def get_is_favorited(self, obj):
         user = self.context['request'].user
-        a = user.is_autehnticated
+        a = getattr(user, 'is_authenticated', False)
         return (
             a and obj.favorited_by.filter(user=user).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
-        a = user.is_autehnticated
+        a = getattr(user, 'is_authenticated', False)
         return (
             a and obj.in_carts.filter(user=user).exists()
         )
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        try:
+            url = obj.image.url
+        except Exception:
+            return None
+        return request.build_absolute_uri(url) if request else url
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
@@ -79,17 +110,19 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Tag.objects.all(),
         required=True,
-        help_text='Список id тегов'
+        help_text='Список id тегов',
     )
-    image = serializers.CharField(
+    image = Base64ImageField(
         write_only=True,
-        help_text='Изображение в Base64'
+        required=False,
+        allow_null=True,
+        help_text='Изображение в Base64',
     )
     name = serializers.CharField(max_length=256)
     text = serializers.CharField()
     cooking_time = serializers.IntegerField(
         min_value=1,
-        help_text='Время приготовления в минутах (>=1)'
+        help_text='Время приготовления в минутах (>=1)',
     )
 
     class Meta:
@@ -138,7 +171,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
-        image_data = validated_data.pop('image')
+        image_data = validated_data.pop('image', None)
 
         recipe = Recipe.objects.create(
             author=self.context['request'].user,
@@ -151,7 +184,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 ingredient_id=item['id'],
                 amount=item['amount']
             )
-        recipe.image = image_data
+        if image_data is not None:
+            recipe.image = image_data
         recipe.save()
         return recipe
 
