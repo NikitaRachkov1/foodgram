@@ -5,7 +5,7 @@ from django.forms.models import BaseInlineFormSet
 from .models import IngredientInRecipe, Favorite, Recipe, ShoppingCart
 
 
-class IngredientRecipeInlineFormSet(BaseInlineFormSet):
+class IngredientInRecipeInlineFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
         seen = set()
@@ -28,6 +28,7 @@ class IngredientInRecipeInline(admin.TabularInline):
     extra = 1
     min_num = 1
     validate_min = True
+    formset = IngredientInRecipeInlineFormSet
 
 
 @admin.register(Recipe)
