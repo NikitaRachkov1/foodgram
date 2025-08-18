@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.core.validators import MinValueValidator
 
 from ingredients.models import Ingredient
 from tags.models import Tag
@@ -52,7 +53,10 @@ class IngredientInRecipe(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
     )
-    amount = models.PositiveIntegerField(verbose_name='Количество')
+    amount = models.PositiveIntegerField(
+        verbose_name='Количество',
+        validators=[MinValueValidator(1)],
+    )
 
     class Meta:
         unique_together = ('recipe', 'ingredient')
@@ -85,19 +89,26 @@ class ShoppingCart(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='cart',
+        verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='in_carts',
+        verbose_name='Рецепт',
     )
+
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
 
 
 class ShortLink(models.Model):
     recipe = models.OneToOneField(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shortlink'
+        related_name='shortlink',
+        verbose_name='Рецепт',
     )
     short_url = models.URLField('короткая ссылка')
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True, verbose_name='создана')

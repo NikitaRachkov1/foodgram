@@ -12,6 +12,11 @@ class User(AbstractUser):
         related_name='subscribers',
         verbose_name='Подписки',
     )
+    USERNAME_FIELD = 'email'
+
+    class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
 
 
 class Subscription(models.Model):
