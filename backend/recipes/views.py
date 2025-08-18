@@ -32,7 +32,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     - GET  /api/recipes/download_shopping_cart/      файл списка покупок
     """
     queryset = (
-        Recipe.objects.all()
+        Recipe.objects.all().order_by('-id')
         .select_related('author')
         .prefetch_related('tags', 'ingredients')
         .distinct()

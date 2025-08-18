@@ -7,9 +7,12 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+USE_X_FORWARDED_HOST = True
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 CSRF_TRUSTED_ORIGINS = ['http://89.169.161.170:8080']
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
