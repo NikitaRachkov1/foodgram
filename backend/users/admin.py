@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
-from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import TokenProxy
 
 from .models import User, Subscription
 
@@ -24,6 +24,6 @@ except admin.sites.NotRegistered:
     pass
 
 try:
-    admin.site.unregister(Token)
+    admin.site.unregister(TokenProxy)
 except admin.sites.NotRegistered:
     pass
