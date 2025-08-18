@@ -13,6 +13,7 @@ class User(AbstractUser):
         verbose_name='Подписки',
     )
     USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = 'пользователь'
