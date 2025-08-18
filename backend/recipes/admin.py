@@ -29,6 +29,7 @@ class IngredientInRecipeInline(admin.TabularInline):
     min_num = 1
     validate_min = True
     formset = IngredientInRecipeInlineFormSet
+    fields = ('ingredient', 'amount')
 
 
 @admin.register(Recipe)

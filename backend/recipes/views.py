@@ -35,6 +35,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         Recipe.objects.all()
         .select_related('author')
         .prefetch_related('tags', 'ingredients')
+        .distinct()
     )
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     pagination_class = PageNumberLimitPagination
@@ -153,7 +154,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
         recipe = self.get_object()
-        short, _ = ShortLink.objects.get_or_create(recipe=recipe)
+        short, _ = ShortLink.objects.get_or_create(
+            recipe=recipe,
+            defaults={
+                'short_url': request.build_absolute_url(
+                    f'/recipes/{recipe.pk}'
+                )
+            },
+        )
         return Response(
             {'short-link': short.short_url}, status=status.HTTP_200_OK
         )
