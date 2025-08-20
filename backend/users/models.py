@@ -12,8 +12,17 @@ class User(AbstractUser):
         related_name='subscribers',
         verbose_name='Подписки',
     )
+    first_name = models.CharField(
+        max_length=64,
+        blank=False,
+        verbose_name='Имя')
+    last_name = models.CharField(
+        max_length=64,
+        blank=False,
+        verbose_name='Фамилия'
+    )
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
 
     class Meta:
         verbose_name = 'пользователь'

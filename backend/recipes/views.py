@@ -157,7 +157,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         short, _ = ShortLink.objects.get_or_create(
             recipe=recipe,
             defaults={
-                'short_url': request.build_absolute_url(
+                'short_url': request.build_absolute_uri(
                     f'/recipes/{recipe.pk}'
                 )
             },
