@@ -11,7 +11,7 @@ USE_X_FORWARDED_HOST = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
-CSRF_TRUSTED_ORIGINS = ['http://89.169.161.170:8080']
+CSRF_TRUSTED_ORIGINS = ['http://yandexfoodgram.zapto.org/', 'https://yandexfoodgram.zapto.org/']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
