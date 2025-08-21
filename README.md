@@ -144,7 +144,7 @@ Foodgram — это веб-приложение для публикации ре
 
 .. code-block:: text
 
-    http://89.169.161.170:8080/
+    https://yandexfoodgram.zapto.org/
 
 Документация API:
 
