@@ -55,7 +55,7 @@ class RecipeMiniFieldSerializer(serializers.ModelSerializer):
         try:
             url = obj.image.url
         except Exception:
-            return None
+            return ''
         return request.build_absolute_uri(url) if request else url
 
 
@@ -94,7 +94,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
         try:
             url = obj.image.url
         except Exception:
-            return None
+            return ''
         return request.build_absolute_uri(url) if request else url
 
 
@@ -114,7 +114,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     )
     image = Base64ImageField(
         write_only=True,
-        required=False,
+        required=True,
         allow_null=True,
         help_text='Изображение в Base64',
     )
@@ -188,6 +188,18 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             recipe.image = image_data
         recipe.save()
         return recipe
+
+    def validate(self, attrs):
+        if self.instance:
+            if 'ingredients' not in self.initial_data:
+                raise serializers.ValidationError({
+                    'ingredients': 'Нужно указать ингредиенты.'
+                })
+            if 'tags' not in self.initial_data:
+                raise serializers.ValidationError({
+                    'tags': 'Нужно указать теги.'
+                })
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         tags_data = validated_data.pop('tags', None)
